@@ -100,7 +100,7 @@ router.put('/parquear/:id', async (req, res) => {
         // Encuentra y actualiza la sección con la placa
         const section = await Section.findOneAndUpdate(
             { _id: req.params.id },
-            { plate: plate },
+            { plate: plate, status: 'no disponible', dateEntry: Date.now() },
             { new: true } // Para que `section` contenga el documento actualizado
         );
 
@@ -123,5 +123,24 @@ router.put('/parquear/:id', async (req, res) => {
         res.status(500).json({ message: 'Error al parquear el vehículo' });
     }
 });
+
+router.put('/salir/:id', async (req, res) => {
+    try {
+        // const { status, plate, dateEntry, dateExit, pin } = req.body;
+        const section = await Section.findOneAndUpdate(
+            { _id: req.params.id },
+            { status: "disponible", plate: "", dateEntry: "", dateExit: "", pin: "" },
+            { new: true }
+        );
+        if (!section) {
+            return res.status(404).send({ error: 'Section not found' });
+        }
+        await section.save();
+        res.status(200).send(section);
+
+    } catch (error) {
+        res.status(400).send({ error: err.message });
+    }
+})
 
 module.exports = router;
